@@ -16,7 +16,8 @@ class Message(object):
 		elif self.platform == 'LINE':
 			self.event = kwargs['event']
 			self.bot = kwargs['bot']
-			self.from_type = self.event.message.source.type
+			logging.info(self.event)
+			self.from_type = self.event.source.type
 			if self.from_type == 'user':
 				self.user = self.bot.get_profile(self.event.source.userId)
 		if 'args' in kwargs:
