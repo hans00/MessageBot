@@ -1,3 +1,5 @@
+import logging
+
 class Message(object):
 	"""global message event"""
 	def __init__(self, platform):
@@ -32,7 +34,18 @@ class Message(object):
 						TextSendMessage(text=data)
 					)
 
-	def isRoom(self):
+	def Tagged(self, compare=None):
+		if self.platform == 'Telegram':
+			for entity in self.update.message.entities:
+				if entity.type == 'mention':
+					tag = self.update.message.text[ entity.offset+1 : entity.offset+entity.length ]
+					logging.info(tag)
+					if compare is None:
+						return True
+					elif tag == compare:
+						return True
+
+	def isGroup(self):
 		return self.from_type == 'room'
 
 	def isPrivate(self):

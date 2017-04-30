@@ -50,7 +50,8 @@ class Telegram(threading.Thread):
 
 	def got_text(self, bot, update):
 		if type(self.text_message) in (str, unicode):
-			bot.sendMessage(chat_id=update.message.chat_id, text=self.text_message)
+			if update.message.chat.type not in ('supergroup', 'group'):
+				bot.sendMessage(chat_id=update.message.chat_id, text=self.text_message)
 		else:
 			msg = Message('Telegram')
 			msg.setEvent(bot=bot, update=update, type='text')
