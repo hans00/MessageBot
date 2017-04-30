@@ -99,7 +99,7 @@ class LINE(threading.Thread):
 					)
 			else:
 				msg = Message('LINE')
-				msg.setEvent(bot=bot_api, event=event, type='text')
+				msg.setEvent(bot=self.bot_api, event=event, type='text')
 				self.text_message(msg)
 
 	def callback(self):
