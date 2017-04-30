@@ -11,11 +11,17 @@ BOT_ID = {
 	'LINE': os.environ['LINE_NAME']
 }
 
-logging.basicConfig(
-	filename=os.environ['LOG'],
-	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-	level=logging.DEBUG
-	)
+if 'LOG' in os.environ:
+	logging.basicConfig(
+		filename=os.environ['LOG'],
+		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+		level=logging.DEBUG
+		)
+else:
+	logging.basicConfig(
+		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+		level=logging.DEBUG
+		)
 
 tg = Telegram(os.environ['TG_TOKEN'])
 line = LINE(os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])

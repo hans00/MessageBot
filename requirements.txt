@@ -1,4 +1,4 @@
-Cython
+Cython==0.25.2
 unqlite
 line-bot-sdk
 python-telegram-bot
