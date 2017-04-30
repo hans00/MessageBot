@@ -2,4 +2,3 @@ Cython==0.25.2
 line-bot-sdk
 python-telegram-bot
 flask
--r requirement-cython.txt
