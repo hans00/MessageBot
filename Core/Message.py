@@ -48,6 +48,13 @@ class Message(object):
 						return True
 					elif tag == compare:
 						return True
+		elif self.platform == 'LINE':
+			result = re.findall(r'@(\w+)', self.event.message.text)
+			logging.debug(result)
+			if compare is None and len(result) > 0:
+				return True
+			if compare in result:
+				return True
 
 	def isGroup(self):
 		return self.from_type == 'room'
