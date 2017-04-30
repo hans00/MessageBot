@@ -29,7 +29,7 @@ line = LINE(os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
 def gotTextMessage(msg):
 	if msg.Tagged(BOT_ID[msg.platform]):
 		msg.Reply("Don't tag meeeee!!!!")
-	elif msg.isGroup():
+	elif not msg.isGroup():
 		msg.Reply("Ummm....")
 
 def group(msg):
