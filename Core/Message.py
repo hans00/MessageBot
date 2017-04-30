@@ -1,4 +1,4 @@
-import logging
+import logging, re
 from linebot.models import (
 	TextSendMessage
 )
