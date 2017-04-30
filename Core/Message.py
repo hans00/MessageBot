@@ -1,4 +1,7 @@
 import logging
+from linebot.models import (
+	TextSendMessage
+)
 
 class Message(object):
 	"""global message event"""

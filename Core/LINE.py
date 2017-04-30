@@ -16,7 +16,7 @@ from re import match as re_match
 class LINE(threading.Thread):
 	@staticmethod
 	def get_key(event, message=None):
-		if TextMessage is None:
+		if message is None:
 			return event.__name__
 		else:
 			return event.__name__ + '_' + message.__name__
