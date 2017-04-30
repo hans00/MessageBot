@@ -1,4 +1,4 @@
-import threading
+import threading, os
 from Message import Message
 from flask import Flask, request, abort, Response
 from linebot import (
@@ -51,7 +51,7 @@ class LINE(threading.Thread):
 	def run(self):
 		self._stop = False
 		if self.builtin_app:
-			self.app.run(host='0.0.0.0')
+			self.app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 33507)))
 
 	def stop(self):
 		self._stop = True

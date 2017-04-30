@@ -3,7 +3,7 @@
 case "${1}" in
   start)
     printf "Starting messagebot... "
-    LOG='main.log' /usr/bin/env python main.py & echo $! > main.pid
+    LOG='main.log' /usr/bin/env python app.py & echo $! > main.pid
     if [ $? ]; then
       echo "OK"
     else
