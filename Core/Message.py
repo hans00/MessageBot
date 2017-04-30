@@ -12,14 +12,11 @@ class Message(object):
 		if self.platform == 'Telegram':
 			self.bot = kwargs['bot']
 			self.update = kwargs['update']
-			if self.update.message.chat.type == 'private':
-				self.from_type = 'user'
-			elif self.update.message.chat.type in ('supergroup', 'group'):
-				self.from_type = 'room'
+			self.from_type = self.update.message.chat.type
 		elif self.platform == 'LINE':
 			self.event = kwargs['event']
 			self.bot = kwargs['bot']
-			logging.debug(self.event)
+			logging.debug(self.event.source.type)
 			self.from_type = self.event.source.type
 			if self.from_type == 'user':
 				self.user = self.bot.get_profile(self.event.source.user_id)
@@ -57,10 +54,10 @@ class Message(object):
 				return True
 
 	def isGroup(self):
-		return self.from_type == 'room'
+		return self.from_type in ('room', 'group', 'supergroup')
 
 	def isPrivate(self):
-		return self.from_type == 'user'
+		return self.from_type in ('user', 'private')
 
 	def UserName(self):
 		if self.platform == 'Telegram':

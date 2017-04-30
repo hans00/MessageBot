@@ -27,9 +27,9 @@ tg = Telegram(os.environ['TG_TOKEN'])
 line = LINE(os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
 
 def gotTextMessage(msg):
-	if msg.isGroup() and msg.Tagged(BOT_ID[msg.platform]):
+	if msg.Tagged(BOT_ID[msg.platform]):
 		msg.Reply("Don't tag meeeee!!!!")
-	else:
+	elif msg.isGroup():
 		msg.Reply("Ummm....")
 
 def group(msg):
