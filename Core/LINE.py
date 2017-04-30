@@ -57,7 +57,7 @@ class LINE(threading.Thread):
 		self._stop = True
 
 	def PushText(self, to, text):
-		bot_api.push_message(to, TextSendMessage(text=text))
+		self.bot_api.push_message(to, TextSendMessage(text=text))
 
 	def got_text(self, event):
 		cmd = re_match( r'^\/(\w+)', event.message.text)
@@ -75,15 +75,15 @@ class LINE(threading.Thread):
 						args = event.message.text.split()
 						del args[0]
 						msg = Message('LINE')
-						msg.setEvent(bot=bot_api, event=event, args=args, type='command')
+						msg.setEvent(bot=self.bot_api, event=event, args=args, type='command')
 						self.command_call[cmd]['call'](msg)
 					else:
 						msg = Message('LINE')
-						msg.setEvent(bot=bot_api, event=event, args=[], type='command')
+						msg.setEvent(bot=self.bot_api, event=event, args=[], type='command')
 						self.command_call[cmd]['call'](msg)
 				else:
 					msg = Message('LINE')
-					msg.setEvent(bot=bot_api, event=event, type='command')
+					msg.setEvent(bot=self.bot_api, event=event, type='command')
 					self.command_call[cmd]['call'](msg)
 			else:
 				text = self.unknown_command
