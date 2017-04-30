@@ -16,10 +16,10 @@ class Message(object):
 		elif self.platform == 'LINE':
 			self.event = kwargs['event']
 			self.bot = kwargs['bot']
-			logging.info(self.event)
+			logging.debug(self.event)
 			self.from_type = self.event.source.type
 			if self.from_type == 'user':
-				self.user = self.bot.get_profile(self.event.source.userId)
+				self.user = self.bot.get_profile(self.event.source.user_id)
 		if 'args' in kwargs:
 			self.args = kwargs['args']
 		self.message_type = kwargs['type']
@@ -40,7 +40,7 @@ class Message(object):
 			for entity in self.update.message.entities:
 				if entity.type == 'mention':
 					tag = self.update.message.text[ entity.offset+1 : entity.offset+entity.length ]
-					logging.info(tag)
+					logging.debug(tag)
 					if compare is None:
 						return True
 					elif tag == compare:
@@ -62,16 +62,16 @@ class Message(object):
 		if self.platform == 'Telegram':
 			return self.update.message.user.id
 		elif self.platform == 'LINE':
-			return self.event.source.userId
+			return self.event.source.sender_id()
 
 	def RoomID(self):
 		if self.platform == 'Telegram':
 			return self.update.message.chat.id
 		elif self.platform == 'LINE':
-			return self.event.source.roomId
+			return self.event.source.sender_id()
 
 	def TextMessage(self):
 		if self.platform == 'Telegram':
 			return self.update.message.text
 		elif self.platform == 'LINE':
-			return self.event.text
+			return self.event.message.text
