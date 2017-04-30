@@ -1,5 +1,5 @@
 import threading
-
+from Message import Message
 from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
 from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler, ConversationHandler)
 
@@ -11,11 +11,11 @@ class CommandCall:
 	def __call__(self, bot, update, args=None):
 		if type(self.ret) is str:
 			text = self.ret
-		elif args is None:
-			text = self.ret(update)
+			bot.sendMessage(chat_id=update.message.chat_id, text=text)
 		else:
-			text = self.ret(update, args)
-		bot.sendMessage(chat_id=update.message.chat_id, text=text)
+			msg = Message('Telegram')
+			msg.setEvent(bot=bot, update=update, args=args, type='command')
+			self.ret(msg)
 
 class Telegram(threading.Thread):
 	"""connect to Telegram"""
@@ -25,6 +25,7 @@ class Telegram(threading.Thread):
 		self.dispatcher = self.updater.dispatcher
 		self.text_message = None
 		self.unknown_command = "Ummm... This command not found."
+		self.text_message = "Ummm... This bot no reply feature."
 		self._first = True
 
 	def __exit__(self):
@@ -48,12 +49,9 @@ class Telegram(threading.Thread):
 		bot.sendMessage(chat_id=update.message.chat_id, text=self.unknown_command)
 
 	def got_text(self, bot, update):
-		if self.text_message is not None:
-			text = self.text_message(update.message.chat_id, update.message.text)
+		if type(self.text_message) in (str, unicode):
+			bot.sendMessage(chat_id=update.message.chat_id, text=self.text_message)
 		else:
-			text = "Ummm... This bot no reply feature."
-		bot.sendMessage(chat_id=update.message.chat_id, text=text)
-
-	def Send(self, id, msg):
-		echo_handler = MessageHandler(Filters.text, echo)
-		dispatcher.add_handler(echo_handler)
+			msg = Message('Telegram')
+			msg.setEvent(bot=bot, update=update, type='text')
+			self.text_message(msg)
