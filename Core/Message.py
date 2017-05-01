@@ -37,21 +37,45 @@ class Message(object):
 
 	def Tagged(self, compare=None):
 		if self.platform == 'Telegram':
+			if compare is None:
+				reault = []
 			for entity in self.update.message.entities:
 				if entity.type == 'mention':
 					tag = self.update.message.text[ entity.offset+1 : entity.offset+entity.length ]
-					logging.debug(tag)
 					if compare is None:
-						return True
+						reault.append(tag)
 					elif tag == compare:
 						return True
+			if compare is None:
+				return result
+			else:
+				return False
 		elif self.platform == 'LINE':
 			result = re.findall(r'@(\w+)', self.event.message.text)
 			logging.debug(result)
-			if compare is None and len(result) > 0:
-				return True
+			if compare is None:
+				return result
 			if compare in result:
 				return True
+
+	def URL(self):
+		if self.platform == 'Telegram':
+			if compare is None:
+				reault = []
+			for entity in self.update.message.entities:
+				if entity.type == 'url':
+					url = self.update.message.text[ entity.offset+1 : entity.offset+entity.length ]
+					if compare is None:
+						reault.append(url)
+			logging.debug(result)
+			return result
+		elif self.platform == 'LINE':
+			result = re.findall(
+					r"(http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\(\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+)",
+					self.event.message.text
+				)
+			logging.debug(result)
+			return result
 
 	def isGroup(self):
 		return self.from_type in ('room', 'group', 'supergroup')

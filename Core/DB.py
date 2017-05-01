@@ -1,37 +1,41 @@
-from unqlite import UnQLite
+import threading
+import psycopg2
+import urlparse
 
-class DB():
+urlparse.uses_netloc.append("postgres")
+
+class DB(threading.Thread):
 	"""Link DB"""
-	def __init__(self, file):
-		self.db = UnQLite(file)
-		self.db.transaction()
-		self.tables = {}
+	def __init__(self, db_url):
+		url = urlparse.urlparse(db_url)
+		self.conn = psycopg2.connect(
+				database=url.path[1:],
+				user=url.username,
+				password=url.password,
+				host=url.hostname,
+				port=url.port
+			)
+		self.conn.autocommit = True
+		self.cur = self.conn.cursor()
+		self.lock = False
 
-	def Table(self, table):
-		if table not in self.tables:
-			self.tables[table] = self.db.collection(table)
-			self.tables[table].create()
-		return self.tables[table]
+	def Exec(self, sql, data=()):
+		while not self.lock: pass
+		self.lock = True
+		self.cur.execute(sql, data)
+		return self
 
-	def Drop(self, table):
-		if table in self.tables:
-			self.tables[table].drop()
-			del self.tables[table]
+	def Release(self):
+		self.lock = False
 
-	def Insert(self, table, value):
-		return self.tables[table].store(value)
+	def FetchOne(self):
+		return self.cur.fetchone()
 
-	def Select(self, table, filter = {}):
-		if len(filter) == 0:
-			return self.tables[table].all()
-		else:
-			return self.tables[table].filter(lambda obj: sum(obj[k] == filter[k] for k in filter))
+	def FetchAll(self):
+		result = self.cursor.fetchall()
+		self.lock = False
+		return result
 		
-	def Update(self, table, index, value):
-		return self.tables[table].update(index, value)
-
-	def __delitem__(self, table):
-		return self.tables[table]
-
-	def __getitem__(self, table):
-		return self.tables[table]
+	def __exit__(self):
+		self.cur.close()
+		self.conn.close()
