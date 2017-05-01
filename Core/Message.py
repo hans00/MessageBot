@@ -146,13 +146,13 @@ class Message(object):
 		if self.platform == 'Telegram':
 			return str(self.update.message.from_user.id)
 		elif self.platform == 'LINE':
-			return self.event.source.sender_id()
+			return self.event.source.sender_id
 
 	def GroupID(self):
 		if self.platform == 'Telegram':
 			return str(self.update.message.chat.id)
 		elif self.platform == 'LINE':
-			return self.event.source.sender_id()
+			return self.event.source.sender_id
 
 	def TextMessage(self):
 		if self.platform == 'Telegram':
