@@ -3,8 +3,14 @@
 
 import os
 import logging
-from Core.LINE import LINE
-from Core.Telegram import Telegram
+from Core import (
+	LINE,
+	Telegram,
+	DB,
+	MessageProcess,
+	Commands
+)
+from Features import Link
 
 BOT_ID = {
 	'Telegram': os.environ['TG_NAME'],
@@ -15,44 +21,36 @@ if 'LOG' in os.environ:
 	logging.basicConfig(
 		filename=os.environ['LOG'],
 		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-		level=logging.DEBUG
+		level=logging.INFO
 		)
 else:
 	logging.basicConfig(
 		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-		level=logging.DEBUG
+		level=logging.INFO
 		)
 
-tg = Telegram(os.environ['TG_TOKEN'])
-line = LINE(os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
+db = DB(os.environ["DATABASE_URL"])
 
-def gotTextMessage(msg):
-	if msg.Tagged(BOT_ID[msg.platform]):
-		msg.Reply("Don't tag meeeee!!!!")
-	elif not msg.isGroup():
-		msg.Reply("Ummm....")
+def TextMessage(msg):
+	if msg.isGroup():
+		Link.GroupMessage(msg)
+	elif msg.Tagged(BOT_ID[msg.platform]):
+		msg.Reply("OAO")
 
-def group(msg):
-	msg.Reply("YES" if msg.isGroup() else "NO")
+platforms = []
+platforms.append(
+	Telegram(os.environ['TG_TOKEN'])
+)
+platforms.append(
+	LINE(os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
+)
 
-def etc(msg):
-	msg.Reply("??")
+Link.cmds = Commands('link', platforms)
+Link(db)
+Link.group.Telegram = platforms[0]
+Link.group.LINE = platforms[1]
+MessageProcess.set(Link.group.check, Link.group.message, from_type='group')
 
-def args(msg):
-	if len(msg.args) == 0:
-		msg.args = ['Nothing']
-	msg.Reply("\n".join(msg.args))
-
-tg.Command("start", "Hello!! ^.^")
-line.Command("start", "Hello!! ^.^")
-tg.Command("etc", etc)
-line.Command("etc", etc)
-tg.Command("args", args, pass_args=True)
-line.Command("args", args, pass_args=True)
-tg.Command("isgroup", group)
-line.Command("isgroup", group)
-tg.text_message = gotTextMessage
-line.text_message = gotTextMessage
-
-line.start()
-tg.start()
+for platform in platforms:
+	platform.text_message = MessageProcess.process
+	platform.start()

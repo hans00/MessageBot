@@ -56,3 +56,7 @@ class Telegram(threading.Thread):
 			msg = Message('Telegram')
 			msg.setEvent(bot=bot, update=update, type='text')
 			self.text_message(msg)
+
+	def Push(self, to, data, type='text'):
+		if type == 'text':
+			self.dispatcher.bot.sendMessage(chat_id=to, text=data)

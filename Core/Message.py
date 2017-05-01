@@ -1,7 +1,59 @@
+from types import FunctionType
 import logging, re
 from linebot.models import (
 	TextSendMessage
 )
+
+class MessageProcess(object):
+	TODO = {
+		"user": [
+			[],
+			[],
+			[]
+		],
+		"group": [
+			[],
+			[],
+			[]
+		]
+	}
+
+	@staticmethod
+	def set(detect, call, from_type='user', priority=0):
+		if from_type not in ('user', 'group'):
+			raise Exception('from_type must in user or group')
+		if priority not in range(3):
+			raise Exception('priority out of range')
+		if not callable(detect):
+			raise Exception('detect must callable')
+		if type(call) not in (str, unicode) and not callable(call):
+			raise Exception('detect must be string or unicode or callable')
+		MessageProcess.TODO[from_type][priority].append({
+			"detect": detect,
+			"call": call,
+		})
+
+	@staticmethod
+	def process(msg):
+		if msg.isGroup():
+			for methods in MessageProcess.TODO['group']:
+				for method in methods:
+					if method['detect'](msg):
+						if type(method['call']) in (str, unicode):
+							msg.Reply(method['call'])
+						else:
+							method['call'](msg)
+						return
+		else:
+			for methods in MessageProcess.TODO['user']:
+				for method in methods:
+					if method['detect'](msg):
+						if type(method['call']) in (str, unicode):
+							msg.Reply(method['call'])
+						else:
+							method['call'](msg)
+						return
+
 
 class Message(object):
 	"""global message event"""
@@ -85,19 +137,20 @@ class Message(object):
 
 	def UserName(self):
 		if self.platform == 'Telegram':
-			return self.update.message.user.id
+			logging.debug(self.update.message)
+			return self.update.message.from_user.username
 		elif self.platform == 'LINE':
 			return self.user.display_name
 
 	def UserID(self):
 		if self.platform == 'Telegram':
-			return self.update.message.user.id
+			return str(self.update.message.from_user.id)
 		elif self.platform == 'LINE':
 			return self.event.source.sender_id()
 
-	def RoomID(self):
+	def GroupID(self):
 		if self.platform == 'Telegram':
-			return self.update.message.chat.id
+			return str(self.update.message.chat.id)
 		elif self.platform == 'LINE':
 			return self.event.source.sender_id()
 

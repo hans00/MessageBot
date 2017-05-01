@@ -1,6 +1,6 @@
 import threading, os
 from Message import Message
-from flask import Flask, request, abort, Response
+from flask import Flask, request, abort
 from linebot import (
 	LineBotApi, WebhookHandler
 )
@@ -56,8 +56,9 @@ class LINE(threading.Thread):
 	def stop(self):
 		self._stop = True
 
-	def PushText(self, to, text):
-		self.bot_api.push_message(to, TextSendMessage(text=text))
+	def Push(self, to, data, type='text'):
+		if type == 'text':
+			self.bot_api.push_message(to, TextSendMessage(text=data))
 
 	def got_text(self, event):
 		cmd = re_match( r'^\/(\w+)', event.message.text)
@@ -67,9 +68,9 @@ class LINE(threading.Thread):
 				if type(self.command_call[cmd]['call']) is str:
 					text = self.command_call[cmd]['call']
 					self.bot_api.reply_message(
-							event.reply_token,
-							TextSendMessage(text=text)
-						)
+						event.reply_token,
+						TextSendMessage(text=text)
+					)
 				elif self.command_call[cmd]['args']:
 					if ' ' in event.message.text:
 						args = event.message.text.split()
@@ -88,15 +89,15 @@ class LINE(threading.Thread):
 			else:
 				text = self.unknown_command
 				self.bot_api.reply_message(
-						event.reply_token,
-						TextSendMessage(text=text)
-					)
+					event.reply_token,
+					TextSendMessage(text=text)
+				)
 		else:
 			if type(self.text_message) in (str, unicode):
 				self.bot_api.reply_message(
-						event.reply_token,
-						TextSendMessage(text=self.text_message)
-					)
+					event.reply_token,
+					TextSendMessage(text=self.text_message)
+				)
 			else:
 				msg = Message('LINE')
 				msg.setEvent(bot=self.bot_api, event=event, type='text')
