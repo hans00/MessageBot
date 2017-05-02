@@ -43,12 +43,9 @@ class Telegram(object):
 	def callback(self):
 		if self._stop:
 			abort(404)
-		try:
-			update = telegram.update.Update.de_json(request.get_json(force=True))
-			logging.debug(update)
-			self.dispatcher.process_update(update)
-		except:
-			abort(400)
+		update = telegram.update.Update.de_json(request.get_json(force=True))
+		logging.debug(update)
+		self.dispatcher.process_update(update)
 		return 'OK'
 
 	def Command(self, command, func, pass_args=False):
