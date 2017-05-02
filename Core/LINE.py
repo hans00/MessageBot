@@ -97,7 +97,6 @@ class LINE(object):
 	def callback(self):
 		if self._stop:
 			abort(404)
-			return '404'
 		signature = request.headers['X-Line-Signature']
 		body = request.get_data(as_text=True)
 		self.app.logger.info("Request body: " + body)

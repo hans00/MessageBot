@@ -20,7 +20,7 @@ BOT_ID = {
 
 logging.basicConfig(
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-	level=logging.DEBUG,
+	level=logging.INFO,
 	**({'filename':os.environ['LOG']} if 'log' in os.environ else {})
 	)
 
