@@ -1,6 +1,6 @@
 from Group import Group
 
-def Unink(cmds, DB):
-	Unink.group = Group(DB)
-	cmds.setCommand('group', Link.group, """Unink groups.""")
-Unink.group = None
+def Unlink(cmds, DB):
+	Unlink.group = Group(DB)
+	cmds.setCommand('group', Link.group, """Unlink groups.""")
+Unlink.group = None
