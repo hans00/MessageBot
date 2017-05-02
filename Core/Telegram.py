@@ -43,7 +43,7 @@ class Telegram(object):
 	def callback(self):
 		if self._stop:
 			abort(404)
-		update = telegram.update.Update.de_json(request.get_json(force=True))
+		update = telegram.update.Update.de_json(request.get_json(force=True), self.bot)
 		logging.debug(update)
 		self.dispatcher.process_update(update)
 		return 'OK'
