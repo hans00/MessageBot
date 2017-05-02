@@ -40,7 +40,13 @@ class Group(object):
 				else:
 					msg.Reply("Your group not in linked or you not link creator.")
 			elif msg.args[0] == 'all':
-				result = self.DB().Exec("SELECT link_id FROM public.link_group WHERE group_id = %s AND user_id = %s GROUP BY link_id;", (msg.GroupID(), msg.UserID()).Fetch()
+				result = self.DB().Exec(
+					"SELECT link_id FROM public.link_group WHERE group_id = %s AND user_id = %s GROUP BY link_id;",
+					(
+						msg.GroupID(),
+						msg.UserID()
+					)
+				).Fetch()
 				if result:
 					link_id = result[0]
 					self.DB().Exec("DELETE FROM public.link_group WHERE link_id = %s;", [link_id])
