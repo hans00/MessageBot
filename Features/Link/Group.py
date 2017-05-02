@@ -21,8 +21,8 @@ class Group(object):
 		if msg.platform == 'LINE':
 			name = 'unknown'
 		elif msg.platform == 'Telegram':
-			if msg.UserName() is not None or msg.UserName() == '':
-				name = 'unkniwn'
+			if msg.UserName() is None or msg.UserName() == '':
+				name = 'unknown'
 			else:
 				name = msg.UserName()
 		sendMsg = "<" + name + ">: " + msg.TextMessage()
