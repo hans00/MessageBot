@@ -23,12 +23,12 @@ class Group(object):
 			"""
 			SELECT group_id, platform
 				FROM public.link_group
-					WHERE link_id IN (
-						SELECT link_id
-							FROM public.link_group
-								WHERE group_id = %s
-					)
-					AND group_id <> %s;
+				WHERE link_id IN (
+					SELECT link_id
+						FROM public.link_group
+						WHERE group_id = %s
+				)
+				AND group_id <> %s;
 			""",
 			[msg.GroupID(), msg.GroupID()]
 		).FetchAll()
@@ -47,11 +47,12 @@ class Group(object):
 			if msg.args[0] == 'create':
 				newid = newLinkID(self.DB())
 				self.DB().Exec(
-					"INSERT INTO public.link_group (link_id, platform, group_id) VALUES(%s, %s, %s);",
+					"INSERT INTO public.link_group (link_id, platform, group_id, user_id) VALUES(%s, %s, %s, %s);",
 					(
 						newid,
 						msg.platform,
-						msg.GroupID()
+						msg.GroupID(),
+						msg.UserID()
 					)
 				)
 				msg.Reply("Your ID is \n" + newid)
@@ -66,11 +67,12 @@ class Group(object):
 					msg.Reply("Your group not in linked.")
 			elif not self.DB().Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch():
 				self.DB().Exec(
-					"INSERT INTO public.link_group (link_id, platform, group_id) VALUES(%s, %s, %s);",
+					"INSERT INTO public.link_group (link_id, platform, group_id, user_id) VALUES(%s, %s, %s, %s);",
 					(
 						msg.args[0],
 						msg.platform,
-						msg.GroupID()
+						msg.GroupID(),
+						msg.UserID()
 					)
 				)
 				msg.Reply("Now linked.")

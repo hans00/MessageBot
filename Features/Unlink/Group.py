@@ -16,16 +16,18 @@ class Group(object):
 					"""
 					SELECT link_id, COUNT(*)
 						FROM public.link_group
-							WHERE link_id IN (
-								SELECT link_id
-									FROM public.link_group
-										WHERE group_id = %s
-							)
-							GROUP BY link_id;
+						WHERE link_id IN (
+							SELECT link_id
+								FROM public.link_group
+								WHERE group_id = %s
+								AND user_id = %s
+						)
+						GROUP BY link_id;
 					""",
-					[
-						msg.GroupID()
-					]
+					(
+						msg.GroupID(),
+						msg.UserID()
+					)
 				).Fetch()
 				if result:
 					link_id, count = result
@@ -38,7 +40,7 @@ class Group(object):
 				else:
 					msg.Reply("Your group not in linked or you not link creator.")
 			elif msg.args[0] == 'all':
-				result = self.DB().Exec("SELECT link_id FROM public.link_group WHERE group_id = %s GROUP BY link_id;", [msg.GroupID()]).Fetch()
+				result = self.DB().Exec("SELECT link_id FROM public.link_group WHERE group_id = %s AND user_id = %s GROUP BY link_id;", (msg.GroupID(), msg.UserID()).Fetch()
 				if result:
 					link_id = result[0]
 					self.DB().Exec("DELETE FROM public.link_group WHERE link_id = %s;", [link_id])
