@@ -3,8 +3,14 @@ class Commands(object):
 		self.commands = {}
 		self.descriptions = {}
 		self.name = name
-		for platform in platforms:
-			platform.Command(name, self.callback, pass_args=True)
+		if type(platforms) in (list, tuple):
+			for platform in platforms:
+				platform.Command(name, self.callback, pass_args=True)
+		elif type(platforms) is dict:
+			for key in platforms:
+				platforms[key].Command(name, self.callback, pass_args=True)
+		else:
+			raise Exception("platforms must be list oe tuple or dict")
 
 	def setCommand(self, name, call, description):
 		self.commands[name] = call

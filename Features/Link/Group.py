@@ -2,17 +2,10 @@ import logging
 from Common import newLinkID
 
 class Group(object):
-	Telegram = None
-	LINE = None
-	def __init__(self, DB):
+	def __init__(self, DB, Telegram, LINE):
 		self.DB = DB
-		try:
-			self.DB().Exec("SELECT * FROM public.link_group;")
-		except:
-			cur = self.DB()
-			cur.Exec("CREATE TABLE public.link_group (link_id character(32), platform character varying(10), group_id character varying(40));")
-			cur.Exec("CREATE INDEX group_id ON public.link_group (group_id);")
-			cur.Exec("ALTER TABLE public.link_group ADD FOREIGN KEY (link_id) REFERENCES public.link(id);")
+		self.Telegram = Telegram
+		self.LINE = LINE
 
 	def check(self, msg):
 		return self.DB().Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch()
@@ -30,12 +23,12 @@ class Group(object):
 			"""
 			SELECT group_id, platform
 				FROM public.link_group
-				WHERE link_id IN (
-					SELECT link_id
-						FROM public.link_group
-						WHERE group_id = %s
-				)
-				AND group_id <> %s;
+					WHERE link_id IN (
+						SELECT link_id
+							FROM public.link_group
+								WHERE group_id = %s
+					)
+					AND group_id <> %s;
 			""",
 			[msg.GroupID(), msg.GroupID()]
 		).FetchAll()

@@ -1,5 +1,6 @@
 import psycopg2
 import urlparse
+import logging
 
 urlparse.uses_netloc.append("postgres")
 
@@ -20,6 +21,7 @@ class DBCursor(object):
 
 	def __exit__(self):
 		self.cur.close()
+		logging.debug('DBCurser destructed.')
 
 class DB(object):
 	"""Link DB"""
