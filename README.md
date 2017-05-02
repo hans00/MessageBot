@@ -1,7 +1,7 @@
 MessageBot
 ========================
 
-Cross playform message bot.
+Cross platform message bot.
 
 
 Supported platform
