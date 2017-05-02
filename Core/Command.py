@@ -18,9 +18,9 @@ class Commands(object):
 
 	def help(self):
 		tmp = "Usage: ... <command>\n"
-		tmp += (" "*12) + "help : Show this message\n"
+		tmp += (" "*20) + "help : Show this message\n"
 		for cmd in self.commands:
-			tmp += (" "*12) + cmd + " : " + self.descriptions[cmd] + "\n"
+			tmp += (" "*20) + cmd + " : " + self.descriptions[cmd] + "\n"
 		return tmp
 
 	def callback(self, msg):
