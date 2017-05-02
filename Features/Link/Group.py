@@ -19,9 +19,12 @@ class Group(object):
 
 	def message(self, msg):
 		if msg.platform == 'LINE':
-			name = 'Somebody@LINE'
+			name = 'unknown'
 		elif msg.platform == 'Telegram':
-			name = msg.UserName()
+			if msg.UserName() not None or msg.UserName() == '':
+				name = 'unkniwn'
+			else:
+				name = msg.UserName()
 		sendMsg = "<" + name + ">: " + msg.TextMessage()
 		result = self.DB().Exec(
 			"""
