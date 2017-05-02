@@ -69,7 +69,7 @@ Link(
 )
 MessageProcess.set(Link.group.check, Link.group.message, from_type='group')
 
-Link(
+Unlink(
 	Commands('unlink', platforms),
 	db,
 	**(platforms)
