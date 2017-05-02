@@ -7,14 +7,15 @@ class Group(object):
 	def __init__(self, DB):
 		self.DB = DB
 		try:
-			self.DB.Exec("SELECT * FROM public.link_group;")
+			self.DB().Exec("SELECT * FROM public.link_group;")
 		except:
-			self.DB.Exec("CREATE TABLE public.link_group (link_id character(32), platform character varying(10), group_id character varying(40));")
-			self.DB.Exec("CREATE INDEX group_id ON public.link_group (group_id);")
-			self.DB.Exec("ALTER TABLE public.link_group ADD FOREIGN KEY (link_id) REFERENCES public.link(id);")
+			cur = self.DB()
+			cur.Exec("CREATE TABLE public.link_group (link_id character(32), platform character varying(10), group_id character varying(40));")
+			cur.Exec("CREATE INDEX group_id ON public.link_group (group_id);")
+			cur.Exec("ALTER TABLE public.link_group ADD FOREIGN KEY (link_id) REFERENCES public.link(id);")
 
 	def check(self, msg):
-		return self.DB.Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch()
+		return self.DB().Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch()
 
 	def message(self, msg):
 		if msg.platform == 'LINE':
@@ -22,9 +23,16 @@ class Group(object):
 		elif msg.platform == 'Telegram':
 			name = msg.UserName()
 		sendMsg = "<" + name + ">: " + msg.TextMessage()
-		result = self.DB.Exec(
+		result = self.DB().Exec(
 			"""
-			SELECT group_id, platform FROM public.link_group WHERE link_id IN (SELECT link_id FROM public.link_group WHERE group_id = %s) AND group_id <> %s;
+			SELECT group_id, platform
+				FROM public.link_group
+				WHERE link_id IN (
+					SELECT link_id
+						FROM public.link_group
+						WHERE group_id = %s
+				)
+				AND group_id <> %s;
 			""",
 			[msg.GroupID(), msg.GroupID()]
 		).FetchAll()
@@ -41,8 +49,8 @@ class Group(object):
 			msg.Reply("Invalid arguments.\nUse: /link group < create | info | *ID* >")
 		else:
 			if msg.args[0] == 'create':
-				newid = newLinkID(self.DB)
-				self.DB.Exec(
+				newid = newLinkID(self.DB())
+				self.DB().Exec(
 					"INSERT INTO public.link_group (link_id, platform, group_id) VALUES(%s, %s, %s);",
 					(
 						newid,
@@ -52,17 +60,16 @@ class Group(object):
 				)
 				msg.Reply("Your ID is \n" + newid)
 			elif msg.args[0] == 'info':
-				result = self.DB.Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch()
-				logging.debug(result)
+				result = self.DB().Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch()
 				if result:
 					reply = "Your ID is \n" + result[0] + "\n\n"
-					result = self.DB.Exec("SELECT COUNT(*) FROM public.link_group WHERE link_id = %s;", [result[0]]).Fetch()
+					result = self.DB().Exec("SELECT COUNT(*) FROM public.link_group WHERE link_id = %s;", [result[0]]).Fetch()
 					reply += "Now linked " + str(result[0]) + " groups."
 					msg.Reply(reply)
 				else:
 					msg.Reply("Your group not in linked.")
-			elif not self.DB.Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch():
-				self.DB.Exec(
+			elif not self.DB().Exec("SELECT * FROM public.link_group WHERE group_id = %s;", [msg.GroupID()]).Fetch():
+				self.DB().Exec(
 					"INSERT INTO public.link_group (link_id, platform, group_id) VALUES(%s, %s, %s);",
 					(
 						msg.args[0],

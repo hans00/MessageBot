@@ -31,11 +31,11 @@ else:
 
 db = DB(os.environ["DATABASE_URL"])
 
-def TextMessage(msg):
-	if msg.isGroup():
-		Link.GroupMessage(msg)
-	elif msg.Tagged(BOT_ID[msg.platform]):
-		msg.Reply("OAO")
+def UnknownMessage(msg):
+	msg.Reply("Bye... (?")
+
+def TeggedMessage(msg):
+	msg.Reply("OAO")
 
 platforms = []
 platforms.append(
@@ -50,6 +50,26 @@ Link(db)
 Link.group.Telegram = platforms[0]
 Link.group.LINE = platforms[1]
 MessageProcess.set(Link.group.check, Link.group.message, from_type='group')
+
+MessageProcess.set(
+	lambda msg: msg.Tagged(BOT_ID[msg.platform]),
+	TeggedMessage,
+	from_type='user'
+)
+
+MessageProcess.set(
+	lambda msg: msg.Tagged(BOT_ID[msg.platform]),
+	TeggedMessage,
+	from_type='group',
+	priority=1
+)
+
+MessageProcess.set(
+	lambda msg: 1,
+	UnknownMessage,
+	from_type='all',
+	priority=2
+)
 
 for platform in platforms:
 	platform.text_message = MessageProcess.process

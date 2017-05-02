@@ -3,6 +3,24 @@ import urlparse
 
 urlparse.uses_netloc.append("postgres")
 
+class DBCursor(object):
+	"""DB Cursor"""
+	def __init__(self, cur):
+		self.cur = cur
+
+	def Exec(self, sql, data=()):
+		self.cur.execute(sql, data)
+		return self
+
+	def Fetch(self):
+		return self.cur.fetchone()
+
+	def FetchAll(self):
+		return self.cur.fetchall()
+
+	def __exit__(self):
+		self.cur.close()
+
 class DB(object):
 	"""Link DB"""
 	def __init__(self, db_url):
@@ -15,19 +33,9 @@ class DB(object):
 				port=url.port
 			)
 		self.conn.autocommit = True
-		self.cur = self.conn.cursor()
 
-	def Exec(self, sql, data=()):
-		self.cur.execute(sql, data)
-		return self
-
-	def Fetch(self):
-		return self.cur.fetchone()
-
-	def FetchAll(self):
-		result = self.cur.fetchall()
-		return result
+	def __call__(self):
+		return DBCursor(self.conn.cursor())
 		
 	def __exit__(self):
-		self.cur.close()
 		self.conn.close()

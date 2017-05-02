@@ -20,18 +20,23 @@ class MessageProcess(object):
 
 	@staticmethod
 	def set(detect, call, from_type='user', priority=0):
-		if from_type not in ('user', 'group'):
-			raise Exception('from_type must in user or group')
+		if from_type not in ('user', 'group', 'all'):
+			raise Exception('from_type must in user or group or all')
 		if priority not in range(3):
 			raise Exception('priority out of range')
 		if not callable(detect):
 			raise Exception('detect must callable')
 		if type(call) not in (str, unicode) and not callable(call):
 			raise Exception('detect must be string or unicode or callable')
-		MessageProcess.TODO[from_type][priority].append({
-			"detect": detect,
-			"call": call,
-		})
+		if from_type == 'all':
+			from_type = ('user', 'group')
+		else:
+			from_type = (from_type,)
+		for ftype in from_type:
+			MessageProcess.TODO[ftype][priority].append({
+				"detect": detect,
+				"call": call,
+			})
 
 	@staticmethod
 	def process(msg):
