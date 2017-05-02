@@ -2,10 +2,8 @@ import logging
 from Common import removeLinkID
 
 class Group(object):
-	def __init__(self, DB, Telegram, LINE):
+	def __init__(self, DB):
 		self.DB = DB
-		self.Telegram = Telegram
-		self.LINE
 
 	def __call__(self, msg):
 		if not msg.isGroup():
