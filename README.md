@@ -15,4 +15,5 @@ Features
 -----------------------
 
 - [x] Link group
+- [x] Tag bot
 - [ ] Chat bot
