@@ -21,7 +21,7 @@ BOT_ID = {
 logging.basicConfig(
 	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
 	level=logging.INFO,
-	**({'filename':os.environ['LOG']} if 'log' in os.environ else {})
+	**({'filename':os.environ['LOG']} if 'LOG' in os.environ else {})
 	)
 
 db = DB(os.environ["DATABASE_URL"])
@@ -38,7 +38,12 @@ platforms.append(
 )
 
 platforms.append(
-	LINE(app, os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
+	LINE(
+		app,
+		os.environ['LINE_TOKEN'],
+		os.environ['LINE_SECRET'],
+		**({'path':os.environ['LINE_PATH']} if 'LINE_PATH' in os.environ else {})
+		)
 )
 
 def TeggedMessage(msg):
