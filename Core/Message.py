@@ -84,7 +84,7 @@ class Message(object):
 	def Reply(self, data, type='text'):
 		if self.platform == 'Telegram':
 			if type == 'text':
-				self.bot.sendMessage(chat_id=self.update.message.chat_id, text=data)
+				self.update.message.reply_text(data)
 		elif self.platform == 'LINE':
 			if type == 'text':
 				self.bot.reply_message(

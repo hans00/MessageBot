@@ -1,6 +1,5 @@
-import threading, os
 from Message import Message
-from flask import Flask, request, abort
+from flask import request, abort
 from linebot import (
 	LineBotApi, WebhookHandler
 )
@@ -13,7 +12,7 @@ from linebot.models import (
 
 from re import match as re_match
 
-class LINE(threading.Thread):
+class LINE(object):
 	@staticmethod
 	def get_key(event, message=None):
 		if message is None:
@@ -25,14 +24,8 @@ class LINE(threading.Thread):
 		key = self.get_key(event, message=message)
 		self.handler._handlers[key] = callback
 
-	def __init__(self, api_token, secret, app='LINE', path='/callback', name='callback'):
-		threading.Thread.__init__(self)
-		if type(app) in (str, unicode):
-			self.app = Flask(app)
-			self.builtin_app = True
-		else:
-			self.app = app
-			self.builtin_app = False
+	def __init__(self, app, api_token, secret, path='/line-callback', name='line_callback'):
+		self.app = app
 		self.app.add_url_rule(path, name, self.callback, methods=['POST'])
 		self.bot_api = LineBotApi(api_token)
 		self.handler = WebhookHandler(secret)
@@ -48,12 +41,10 @@ class LINE(threading.Thread):
 		self.command_call[command]['call'] = func
 		self.command_call[command]['args'] = pass_args
 
-	def run(self):
+	def Start(self):
 		self._stop = False
-		if self.builtin_app:
-			self.app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 33507)))
 
-	def stop(self):
+	def Stop(self):
 		self._stop = True
 
 	def Push(self, to, data, type='text'):

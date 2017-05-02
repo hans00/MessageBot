@@ -3,6 +3,7 @@
 
 import os
 import logging
+from flask import Flask
 from Core import (
 	LINE,
 	Telegram,
@@ -17,39 +18,31 @@ BOT_ID = {
 	'LINE': os.environ['LINE_NAME']
 }
 
-if 'LOG' in os.environ:
-	logging.basicConfig(
-		filename=os.environ['LOG'],
-		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-		level=logging.INFO
-		)
-else:
-	logging.basicConfig(
-		format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-		level=logging.INFO
-		)
+logging.basicConfig(
+	format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+	level=logging.INFO,
+	**({'filename':os.environ['LOG']} if 'log' in os.environ else {})
+	)
 
 db = DB(os.environ["DATABASE_URL"])
+app = Flask(__name__)
 
-def UnknownMessage(msg):
-	msg.Reply("Bye... (?")
+@app.route('/')
+def index():
+    return "<p>Hello World!</p>"
+
+platforms = []
+
+platforms.append(
+	Telegram(app, os.environ['HTTP_HOST'],os.environ['TG_TOKEN'])
+)
+
+platforms.append(
+	LINE(app, os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
+)
 
 def TeggedMessage(msg):
 	msg.Reply("OAO")
-
-platforms = []
-platforms.append(
-	Telegram(os.environ['TG_TOKEN'])
-)
-platforms.append(
-	LINE(os.environ['LINE_TOKEN'], os.environ['LINE_SECRET'])
-)
-
-Link.cmds = Commands('link', platforms)
-Link(db)
-Link.group.Telegram = platforms[0]
-Link.group.LINE = platforms[1]
-MessageProcess.set(Link.group.check, Link.group.message, from_type='group')
 
 MessageProcess.set(
 	lambda msg: msg.Tagged(BOT_ID[msg.platform]),
@@ -60,9 +53,17 @@ MessageProcess.set(
 MessageProcess.set(
 	lambda msg: msg.Tagged(BOT_ID[msg.platform]),
 	TeggedMessage,
-	from_type='group',
-	priority=1
+	from_type='group'
 )
+
+Link.cmds = Commands('link', platforms)
+Link(db)
+Link.group.Telegram = platforms[0]
+Link.group.LINE = platforms[1]
+MessageProcess.set(Link.group.check, Link.group.message, from_type='group')
+
+def UnknownMessage(msg):
+	msg.Reply("Bye... (?")
 
 MessageProcess.set(
 	lambda msg: 1,
@@ -73,4 +74,6 @@ MessageProcess.set(
 
 for platform in platforms:
 	platform.text_message = MessageProcess.process
-	platform.start()
+	platform.Start()
+
+app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 33507)))

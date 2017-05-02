@@ -1,7 +1,13 @@
-import threading
+import logging
 from Message import Message
-from telegram import (ReplyKeyboardMarkup, ReplyKeyboardRemove)
-from telegram.ext import (Updater, CommandHandler, MessageHandler, Filters, RegexHandler, ConversationHandler)
+from flask import request, abort
+import telegram
+from telegram.ext import (
+	Dispatcher,
+	CommandHandler,
+	MessageHandler,
+	Filters
+)
 
 class CommandCall:
 	def __init__(self, cmd, ret):
@@ -17,36 +23,50 @@ class CommandCall:
 			msg.setEvent(bot=bot, update=update, args=args, type='command')
 			self.ret(msg)
 
-class Telegram(threading.Thread):
+class Telegram(object):
 	"""connect to Telegram"""
-	def __init__(self, token):
-		threading.Thread.__init__(self)
-		self.updater = Updater(token=token)
-		self.dispatcher = self.updater.dispatcher
-		self.text_message = None
-		self.unknown_command = "Ummm... This command not found."
+	def __init__(self, app, host, token, cert=None, port='443', name='tg_callback'):
+		self.app = app
+		self.app.add_url_rule('/'+token, name, self.callback, methods=['POST'])
+		self.bot = telegram.Bot(token)
+		self.bot.setWebhook(webhook_url='https://%s:%s/%s' % (host, port, token),
+			**({'certificate':open(cert, 'rb')} if cert is not None else {}))
+		self.dispatcher = Dispatcher(self.bot, None, workers=0)
+		self.unknown_command_text = "Ummm... This command not found."
 		self.text_message = "Ummm... This bot no reply feature."
-		self._first = True
+		self._stop = True
+		self._inited = False
 
 	def __exit__(self):
-		self.Stop()
+		self.stop()
+
+	def callback(self):
+		if self._stop:
+			abort(404)
+		try:
+			update = telegram.update.Update.de_json(request.get_json(force=True))
+			logging.debug(update)
+			self.dispatcher.process_update(update)
+		except:
+			abort(400)
+		return 'OK'
 
 	def Command(self, command, func, pass_args=False):
 		handler = CommandHandler(command, CommandCall(command, func), pass_args=pass_args)
 		self.dispatcher.add_handler(handler)
 
-	def run(self):
-		if self._first:
+	def Start(self):
+		if not self._inited:
 			self.dispatcher.add_handler(MessageHandler(Filters.text, self.got_text))
-			self.dispatcher.add_handler(MessageHandler(Filters.command, self.Unknown))
-			self._first = False
-		self.updater.start_polling()
+			self.dispatcher.add_handler(MessageHandler(Filters.command, self.unknown_command))
+			self._inited = True
+		self._stop = False
 
-	def stop(self):
-		self.updater.stop()
+	def Stop(self):
+		self._stop = True
 
-	def Unknown(self, bot, update):
-		bot.sendMessage(chat_id=update.message.chat_id, text=self.unknown_command)
+	def unknown_command(self, bot, update):
+		update.message.reply_text(self.unknown_command_text)
 
 	def got_text(self, bot, update):
 		if type(self.text_message) in (str, unicode):
@@ -59,4 +79,4 @@ class Telegram(threading.Thread):
 
 	def Push(self, to, data, type='text'):
 		if type == 'text':
-			self.dispatcher.bot.sendMessage(chat_id=to, text=data)
+			self.bot.sendMessage(chat_id=to, text=data)
