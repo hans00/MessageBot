@@ -78,7 +78,7 @@ def UnknownMessage(msg):
 	msg.Reply("Bye... (?")
 
 MessageProcess.set(
-	lambda msg: 1,
+	lambda msg: msg.isPrivate(),
 	UnknownMessage,
 	from_type='all',
 	priority=2
