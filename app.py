@@ -53,13 +53,7 @@ def TeggedMessage(msg):
 MessageProcess.set(
 	lambda msg: msg.Tagged(BOT_ID[msg.platform]),
 	TeggedMessage,
-	from_type='user'
-)
-
-MessageProcess.set(
-	lambda msg: msg.Tagged(BOT_ID[msg.platform]),
-	TeggedMessage,
-	from_type='group'
+	from_type='all'
 )
 
 Link(
@@ -75,12 +69,12 @@ Unlink(
 )
 
 def UnknownMessage(msg):
-	msg.Reply("Bye... (?")
+	msg.Reply(u"/// Ü ///")
 
 MessageProcess.set(
-	lambda msg: msg.isPrivate(),
+	lambda msg: 1,
 	UnknownMessage,
-	from_type='all',
+	from_type='user',
 	priority=2
 )
 
