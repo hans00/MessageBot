@@ -68,8 +68,13 @@ Unlink(
 	db
 )
 
+platforms['Telegram'].Command(
+	'chat_id',
+	lambda msg: msg.Reply("ID: "+msg.GroupID())
+)
+
 def UnknownMessage(msg):
-	msg.Reply(u"/// Ü ///")
+	msg.Reply(u"????")
 
 MessageProcess.set(
 	lambda msg: 1,
