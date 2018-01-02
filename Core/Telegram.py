@@ -25,7 +25,7 @@ class CommandCall:
 
 class Telegram(object):
 	"""connect to Telegram"""
-	def __init__(self, app, host, token, cert=None, port='443', name='tg_callback'):
+	def __init__(self, app, host, token, cert=None, unknown_command_text=None, port='443', name='tg_callback'):
 		self.app = app
 		self.app.add_url_rule('/'+token, name, self.callback, methods=['POST'])
 		self.bot = telegram.Bot(token)
@@ -33,7 +33,6 @@ class Telegram(object):
 			**({'certificate':open(cert, 'rb')} if cert is not None else {}))
 		self.dispatcher = Dispatcher(self.bot, None, workers=0)
 		self.unknown_command_text = "Ummm... This command not found."
-		self.text_message = "Ummm... This bot no reply feature."
 		self._stop = True
 		self._inited = False
 
@@ -63,7 +62,8 @@ class Telegram(object):
 		self._stop = True
 
 	def unknown_command(self, bot, update):
-		update.message.reply_text(self.unknown_command_text)
+		if update.message.chat.type not in ('supergroup', 'group'):
+			update.message.reply_text(self.unknown_command_text)
 
 	def got_text(self, bot, update):
 		if type(self.text_message) in (str, unicode):

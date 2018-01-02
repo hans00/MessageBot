@@ -77,7 +77,7 @@ class LINE(object):
 					msg = Message('LINE')
 					msg.setEvent(bot=self.bot_api, event=event, type='command')
 					self.command_call[cmd]['call'](msg)
-			else:
+			elif event.source.type not in ('room', 'group', 'supergroup'):
 				text = self.unknown_command
 				self.bot_api.reply_message(
 					event.reply_token,
